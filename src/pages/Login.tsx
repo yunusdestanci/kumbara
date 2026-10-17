@@ -19,6 +19,7 @@ export function Login() {
   return (
     <div className="center">
       <form className="card login" onSubmit={submit}>
+        <img src="/logo.png" alt="Serhendi Vakfı" style={{ width: 120, display: 'block', margin: '0 auto 8px' }} />
         <h1>Kumbara Takip</h1>
         <label>
           E-posta

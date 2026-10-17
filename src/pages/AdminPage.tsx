@@ -321,7 +321,10 @@ export function AdminPage({ userId }: Props) {
   return (
     <div className="admin-shell">
       <nav className="admin-nav">
-        <div className="brand">Kumbara · Merkez</div>
+        <div className="brand">
+          <img src="/logo.png" alt="Serhendi Vakfı" />
+          <span>Kumbara · Merkez</span>
+        </div>
         {MENU.map((m) => (
           <button
             key={m.key}

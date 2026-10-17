@@ -23,6 +23,18 @@
   font-weight: 700;
   font-size: 18px;
   padding: 4px 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-nav .brand img {
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 3px;
+  box-sizing: border-box;
 }
 
 .admin-nav-item {
