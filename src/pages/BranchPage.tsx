@@ -25,6 +25,8 @@ export function BranchPage({ branchId, userId }: Props) {
   const [error, setError] = useState<string | null>(null);
   // null: henüz kontrol edilmedi, true: ilk girişte şifre değiştirilmeli
   const [mustChange, setMustChange] = useState<boolean | null>(null);
+  // Veriler gelene kadar "dönem yok" uyarısını gösterme
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     supabase
@@ -70,6 +72,7 @@ export function BranchPage({ branchId, userId }: Props) {
     } else {
       setCollections([]);
     }
+    setLoaded(true);
   }, [branchId, year, month]);
 
   useEffect(() => {
@@ -99,7 +102,7 @@ export function BranchPage({ branchId, userId }: Props) {
         {branchName} · {monthName(month)} {year}
       </h2>
 
-      {!period && (
+      {loaded && !period && (
         <div className="card warn">
           Bu ay için dönem henüz açılmamış. Merkez yönetici dönemi açtığında toplama girebilirsiniz.
         </div>

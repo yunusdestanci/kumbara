@@ -35,6 +35,8 @@ export function AdminPage({ userId }: Props) {
   const [handovers, setHandovers] = useState<Handover[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // Veriler gelene kadar "dönem yok" uyarısı ve "Bu ayı aç" butonu gösterilmesin
+  const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -59,6 +61,7 @@ export function AdminPage({ userId }: Props) {
     setRows((c.data ?? []) as unknown as CollRow[]);
     setHandovers((h.data ?? []) as Handover[]);
     setSelectedId((prev) => prev || ps[0]?.id || '');
+    setLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -187,11 +190,11 @@ export function AdminPage({ userId }: Props) {
             <button className="ghost" onClick={() => closePeriod(selected.id)}>Dönemi kapat</button>
           )}
           {selected && <button className="ghost" onClick={exportSummaryCsv}>CSV indir</button>}
-          {!currentExists && <button onClick={openCurrentPeriod}>Bu ayı aç</button>}
+          {loaded && !currentExists && <button onClick={openCurrentPeriod}>Bu ayı aç</button>}
         </div>
       </div>
 
-      {periods.length === 0 && (
+      {loaded && periods.length === 0 && (
         <div className="card warn">Henüz dönem yok. "Bu ayı aç" ile başlayın.</div>
       )}
 
