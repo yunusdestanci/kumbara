@@ -66,10 +66,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 interface Props {
   branches: Branch[];
+  // Ana sayfada gömülü kullanım: sekme ve dönem seçimi gizlenir, dışarıdan gelen dönem kullanılır
+  embedded?: boolean;
+  periodId?: string;
 }
 
 // Admin: aylık merkez raporu ve şube bazlı 12 aylık rapor.
-export function Reports({ branches }: Props) {
+export function Reports({ branches, embedded = false, periodId: presetPeriodId }: Props) {
   const [mode, setMode] = useState<'ay' | 'sube'>('ay');
   const [periods, setPeriods] = useState<Period[]>([]);
   const [periodId, setPeriodId] = useState('');
@@ -81,6 +84,11 @@ export function Reports({ branches }: Props) {
   const [branchColls, setBranchColls] = useState<CollRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Dışarıdan dönem gelirse (ana sayfa) onu kullan
+  useEffect(() => {
+    if (presetPeriodId) setPeriodId(presetPeriodId);
+  }, [presetPeriodId]);
 
   // Genel veriler: dönemler, kumbaralar, teslimler, harcamalar
   useEffect(() => {
@@ -143,7 +151,7 @@ export function Reports({ branches }: Props) {
   if (loading) return <p className="muted">Rapor hazırlanıyor…</p>;
   if (err) return <p className="error">{err}</p>;
 
-  const switcher = (
+  const switcher = embedded ? null : (
     <div className="form-row" style={{ marginBottom: 12 }}>
       <button className={mode === 'ay' ? '' : 'ghost'} onClick={() => setMode('ay')}>Ay raporu</button>
       <button className={mode === 'sube' ? '' : 'ghost'} onClick={() => setMode('sube')}>Şube raporu</button>
@@ -200,7 +208,7 @@ export function Reports({ branches }: Props) {
     return (
       <>
         {switcher}
-        <div className="form-row" style={{ marginBottom: 12 }}>
+        {!embedded && <div className="form-row" style={{ marginBottom: 12 }}>
           <select value={periodId} onChange={(e) => setPeriodId(e.target.value)}>
             {periods.map((x) => (
               <option key={x.id} value={x.id}>
@@ -208,7 +216,7 @@ export function Reports({ branches }: Props) {
               </option>
             ))}
           </select>
-        </div>
+        </div>}
 
         {!p && <p className="muted">Henüz dönem yok.</p>}
 

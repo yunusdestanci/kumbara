@@ -267,46 +267,7 @@ export function AdminPage({ userId }: Props) {
           )}
         </div>
 
-        <section className="stats">
-          <Stat label="Dönem toplamı" value={money(totals.periodTotal)} />
-          <Stat label="Toplandı" value={`${totals.collectedCount} / ${totals.activeBoxes}`} />
-          <Stat label="Toplanmadı" value={String(totals.missedCount)} />
-          <Stat label="Girilmedi" value={String(totals.notRecorded)} />
-          <Stat label="Şubelerde kalan" value={money(totals.remaining)} />
-          <Stat label="Onay bekleyen teslim" value={money(totals.pending)} />
-        </section>
-
-        <h3>Şubeler</h3>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Şube</th>
-                <th>Kumbara</th>
-                <th>Toplandı</th>
-                <th>Toplanmadı</th>
-                <th>Girilmedi</th>
-                <th>Dönem toplamı</th>
-                <th>Şubede kalan</th>
-                <th>Onay bekleyen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summary.map((s) => (
-                <tr key={s.branch.id}>
-                  <td>{s.branch.name}</td>
-                  <td>{s.activeBoxes}</td>
-                  <td>{s.collectedCount}</td>
-                  <td>{s.missedCount}</td>
-                  <td>{s.notRecorded}</td>
-                  <td>{money(s.periodTotal)}</td>
-                  <td>{money(s.remaining)}</td>
-                  <td>{s.pending > 0 ? money(s.pending) : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Reports branches={branches} embedded periodId={selectedId} />
       </>
     );
   } else if (section === 'subeler') {
@@ -406,11 +367,3 @@ export function AdminPage({ userId }: Props) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="stat">
-      <div className="muted small">{label}</div>
-      <div className="stat-value">{value}</div>
-    </div>
-  );
-}
