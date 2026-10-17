@@ -46,10 +46,17 @@ export function printReceipt(d: ReceiptData) {
   .amount { font-size: 26px; font-weight: 700; color: #1f6f4a; text-align: right; margin-top: 14px; }
   .sign { display: flex; justify-content: space-between; margin-top: 56px; font-size: 14px; }
   .sign div { width: 42%; border-top: 1px solid #111; padding-top: 6px; text-align: center; }
-  @media print { body { padding: 0; } .sheet { border: none; } }
+  .toolbar { text-align: center; margin-bottom: 18px; }
+  .toolbar button { padding: 10px 18px; font-size: 15px; margin: 0 6px; border-radius: 8px; border: 1px solid #1f6f4a; background: #1f6f4a; color: #fff; cursor: pointer; }
+  .toolbar button.sec { background: #fff; color: #1f6f4a; }
+  @media print { body { padding: 0; } .sheet { border: none; } .toolbar { display: none; } }
 </style>
 </head>
 <body>
+<div class="toolbar">
+  <button onclick="window.print()">Yazdır / PDF kaydet</button>
+  <button class="sec" onclick="window.close()">Kapat</button>
+</div>
 <div class="sheet">
   <header>
     <img src="${logo}" alt="Serhendi Vakfı">
