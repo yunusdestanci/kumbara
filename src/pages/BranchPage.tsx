@@ -94,7 +94,10 @@ export function BranchPage({ branchId, userId }: Props) {
   const approvedHandedTotal = handovers
     .filter((h) => h.status === 'onaylandi')
     .reduce((s, h) => s + h.amount, 0);
-  const remainingInBranch = allCollectedTotal - approvedHandedTotal;
+  // Bekleyen teslimler de bakiyeden düşülür, aynı parayı iki kez teslim edilemesin
+  const handedAllTotal = handovers.reduce((s, h) => s + h.amount, 0);
+  const remainingInBranch = allCollectedTotal - handedAllTotal;
+  void approvedHandedTotal;
 
   return (
     <>
@@ -113,7 +116,7 @@ export function BranchPage({ branchId, userId }: Props) {
         <Stat label="Toplandı" value={`${collected.length} / ${boxes.length}`} />
         <Stat label="Toplanmadı" value={String(missed.length)} />
         <Stat label="Bekliyor" value={String(Math.max(pendingCount, 0))} />
-        <Stat label="Şubede kalan (tüm zamanlar)" value={money(remainingInBranch)} />
+        <Stat label="Teslim edilebilir bakiye" value={money(remainingInBranch)} />
       </section>
 
       <h3>Kumbaralar</h3>
@@ -138,6 +141,7 @@ export function BranchPage({ branchId, userId }: Props) {
         periodId={period?.id ?? null}
         userId={userId}
         handovers={handovers}
+        available={remainingInBranch}
         onSaved={load}
       />
 
@@ -281,13 +285,14 @@ function BoxRow({ box, collection, periodId, userId, onSaved }: BoxRowProps) {
 
 interface HandoverProps {
   branchId: string;
+  available: number;
   periodId: string | null;
   userId: string;
   handovers: Handover[];
   onSaved: () => void;
 }
 
-function HandoverSection({ branchId, periodId, userId, handovers, onSaved }: HandoverProps) {
+function HandoverSection({ branchId, periodId, userId, handovers, available, onSaved }: HandoverProps) {
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
@@ -299,6 +304,10 @@ function HandoverSection({ branchId, periodId, userId, handovers, onSaved }: Han
     const n = parseAmount(amount);
     if (n === null || n <= 0) {
       setErr('Geçerli bir tutar girin.');
+      return;
+    }
+    if (n > available) {
+      setErr(`Bakiye yetersiz. Teslim edilebilir en fazla ${money(available)}.`);
       return;
     }
     setBusy(true);

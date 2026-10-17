@@ -147,6 +147,14 @@ export function AdminPage({ userId }: Props) {
     else refresh();
   }
 
+  // Hatalı teslim kaydını sil (işlem geçmişine kaydedilir)
+  async function deleteHandover(id: string, amount: number) {
+    if (!confirm(`${money(amount)} tutarındaki teslim kaydı silinsin mi?`)) return;
+    const { error } = await supabase.from('handovers').delete().eq('id', id);
+    if (error) setError(error.message);
+    else refresh();
+  }
+
   // Dönem özetini Excel'de açılabilen CSV olarak indir
   function exportSummaryCsv() {
     if (!selected) return;
@@ -324,11 +332,14 @@ export function AdminPage({ userId }: Props) {
                 {h.note ? ` · ${h.note}` : ''}
               </div>
             </div>
-            {h.status === 'bekliyor' ? (
-              <button onClick={() => approveHandover(h.id)}>Teslim alındı, onayla</button>
-            ) : (
-              <span className="badge onaylandi">Onaylandı</span>
-            )}
+            <div className="form-row">
+              {h.status === 'bekliyor' ? (
+                <button onClick={() => approveHandover(h.id)}>Teslim alındı, onayla</button>
+              ) : (
+                <span className="badge onaylandi">Onaylandı</span>
+              )}
+              <button className="ghost" onClick={() => deleteHandover(h.id, h.amount)}>Sil</button>
+            </div>
           </li>
         ))}
         {handovers.length === 0 && <p className="muted">Henüz teslim kaydı yok.</p>}
