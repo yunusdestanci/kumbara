@@ -8,6 +8,7 @@ import { BranchUserForm } from '../components/BranchUserForm';
 import { AdminCollect } from '../components/AdminCollect';
 import { ExpenseManager } from '../components/ExpenseManager';
 import { AuditLog } from '../components/AuditLog';
+import { Reports } from '../components/Reports';
 
 // Tüm kumbara kayıtları (şube adıyla birlikte, tek sorguda).
 interface CollRow {
@@ -38,7 +39,7 @@ export function AdminPage({ userId }: Props) {
   // Veriler gelene kadar "dönem yok" uyarısı ve "Bu ayı aç" butonu gösterilmesin
   const [loaded, setLoaded] = useState(false);
   // Ekran: ana sayfa veya ayrı işlem geçmişi sayfası
-  const [view, setView] = useState<'home' | 'log'>('home');
+  const [view, setView] = useState<'home' | 'log' | 'rapor'>('home');
 
   const load = useCallback(async () => {
     setError(null);
@@ -179,6 +180,7 @@ export function AdminPage({ userId }: Props) {
   const nav = (
     <div className="form-row" style={{ marginBottom: 12 }}>
       <button className={view === 'home' ? '' : 'ghost'} onClick={() => setView('home')}>Ana sayfa</button>
+      <button className={view === 'rapor' ? '' : 'ghost'} onClick={() => setView('rapor')}>Raporlar</button>
       <button className={view === 'log' ? '' : 'ghost'} onClick={() => setView('log')}>İşlem geçmişi</button>
     </div>
   );
@@ -188,6 +190,15 @@ export function AdminPage({ userId }: Props) {
       <>
         {nav}
         <AuditLog />
+      </>
+    );
+  }
+
+  if (view === 'rapor') {
+    return (
+      <>
+        {nav}
+        <Reports branches={branches} />
       </>
     );
   }
