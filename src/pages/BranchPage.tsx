@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from
 import { supabase } from '../lib/supabase';
 import type { Box, Collection, Handover, Period } from '../lib/types';
 import { dateTr, money, monthName, parseAmount } from '../lib/format';
+import { AddBoxForm } from '../components/AddBoxForm';
 
 interface Props {
   branchId: string;
@@ -109,6 +110,8 @@ export function BranchPage({ branchId, userId }: Props) {
         ))}
         {boxes.length === 0 && <p className="muted">Bu şubeye atanmış aktif kumbara yok.</p>}
       </div>
+
+      <AddBoxForm branchId={branchId} onAdded={load} />
 
       <HandoverSection
         branchId={branchId}
