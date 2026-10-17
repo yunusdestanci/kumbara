@@ -7,13 +7,19 @@ interface Props {
   onChanged: () => void;
 }
 
-// Admin: şube ekleme ve pasife alma. Şube giriş hesabı bu ekranda oluşturulmaz.
+// Admin: şube ekleme, düzenleme ve pasife alma. Şube giriş hesabı bu ekranda oluşturulmaz.
 export function BranchManager({ branches, onChanged }: Props) {
   const [name, setName] = useState('');
   const [district, setDistrict] = useState('');
   const [responsible, setResponsible] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  // Düzenleme durumu
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editDistrict, setEditDistrict] = useState('');
+  const [editResponsible, setEditResponsible] = useState('');
 
   async function addBranch(e: FormEvent) {
     e.preventDefault();
@@ -37,6 +43,38 @@ export function BranchManager({ branches, onChanged }: Props) {
     setName('');
     setDistrict('');
     setResponsible('');
+    onChanged();
+  }
+
+  function startEdit(b: Branch) {
+    setErr(null);
+    setEditingId(b.id);
+    setEditName(b.name);
+    setEditDistrict(b.district ?? '');
+    setEditResponsible(b.responsible_name ?? '');
+  }
+
+  async function saveEdit(id: string) {
+    setErr(null);
+    if (!editName.trim()) {
+      setErr('Şube adı boş olamaz.');
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase
+      .from('branches')
+      .update({
+        name: editName.trim(),
+        district: editDistrict.trim() || null,
+        responsible_name: editResponsible.trim() || null,
+      })
+      .eq('id', id);
+    setBusy(false);
+    if (error) {
+      setErr(error.message);
+      return;
+    }
+    setEditingId(null);
     onChanged();
   }
 
@@ -64,19 +102,38 @@ export function BranchManager({ branches, onChanged }: Props) {
 
       <ul className="list">
         {branches.map((b) => (
-          <li key={b.id} className="card row">
-            <div>
-              <strong>{b.name}</strong>
-              <div className="muted small">
-                {[b.district, b.responsible_name].filter(Boolean).join(' · ') || '—'}
+          <li key={b.id} className="card">
+            {editingId === b.id ? (
+              <div>
+                <div className="form-row">
+                  <input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Şube adı" />
+                  <input value={editDistrict} onChange={(e) => setEditDistrict(e.target.value)} placeholder="Semt" />
+                  <input value={editResponsible} onChange={(e) => setEditResponsible(e.target.value)} placeholder="Sorumlu kişi" />
+                </div>
+                <div className="actions">
+                  <button disabled={busy} onClick={() => saveEdit(b.id)}>Kaydet</button>
+                  <button className="ghost" onClick={() => setEditingId(null)}>İptal</button>
+                </div>
               </div>
-            </div>
-            {b.active ? (
-              <button className="ghost" onClick={() => setActive(b.id, false)}>Pasife al</button>
             ) : (
-              <div className="form-row">
-                <span className="badge bekliyor">Pasif</span>
-                <button className="ghost" onClick={() => setActive(b.id, true)}>Aktifleştir</button>
+              <div className="row">
+                <div>
+                  <strong>{b.name}</strong>
+                  <div className="muted small">
+                    {[b.district, b.responsible_name].filter(Boolean).join(' · ') || '—'}
+                  </div>
+                </div>
+                <div className="form-row">
+                  <button className="ghost" onClick={() => startEdit(b)}>Düzenle</button>
+                  {b.active ? (
+                    <button className="ghost" onClick={() => setActive(b.id, false)}>Pasife al</button>
+                  ) : (
+                    <>
+                      <span className="badge bekliyor">Pasif</span>
+                      <button className="ghost" onClick={() => setActive(b.id, true)}>Aktifleştir</button>
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </li>
