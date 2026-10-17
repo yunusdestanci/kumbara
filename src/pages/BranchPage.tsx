@@ -194,12 +194,17 @@ function BoxRow({ box, collection, periodId, userId, onSaved }: BoxRowProps) {
         period_id: periodId,
         box_id: box.id,
         status: 'toplandi',
-        amount: n,
+        // Aynı ay ikinci kez toplanırsa önceki tutarın üzerine eklenir
+        amount: (collection?.status === 'toplandi' ? collection.amount ?? 0 : 0) + n,
         reason: null,
         collected_at: new Date().toISOString(),
         counted_by: userId,
       };
     } else {
+      if (collection?.status === 'toplandi') {
+        setErr('Bu kumbaradan bu ay zaten para toplandı. Toplanmadı olarak işaretlenemez.');
+        return;
+      }
       if (!reason.trim()) {
         setErr('Toplanmama sebebini yazın.');
         return;
@@ -242,7 +247,7 @@ function BoxRow({ box, collection, periodId, userId, onSaved }: BoxRowProps) {
 
       {periodId && mode === null && (
         <div className="actions">
-          <button onClick={() => setMode('toplandi')}>Topla</button>
+          <button onClick={() => setMode('toplandi')}>{status === 'toplandi' ? 'Ekle' : 'Topla'}</button>
           <button className="ghost" onClick={() => setMode('toplanmadi')}>Toplanmadı</button>
         </div>
       )}
