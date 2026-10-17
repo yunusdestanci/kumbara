@@ -10,6 +10,7 @@ import { AdminCollect } from '../components/AdminCollect';
 import { ExpenseManager } from '../components/ExpenseManager';
 import { Reports } from '../components/Reports';
 import { AuditLog } from '../components/AuditLog';
+import { printReceipt } from '../lib/receipt';
 import './admin.css';
 
 type Section = 'ana' | 'subeler' | 'kumbara' | 'toplama' | 'teslim' | 'harcama' | 'rapor' | 'gecmis';
@@ -303,6 +304,22 @@ export function AdminPage({ userId }: Props) {
               ) : (
                 <span className="badge onaylandi">Onaylandı</span>
               )}
+              <button
+                className="ghost"
+                onClick={() =>
+                  printReceipt({
+                    receiptNo: `MK-${new Date(h.handed_over_at).getFullYear()}-${h.id.slice(0, 6).toUpperCase()}`,
+                    handedAt: h.handed_over_at,
+                    branchName: branchName(h.branch_id),
+                    amount: h.amount,
+                    note: h.note,
+                    status: h.status,
+                    confirmedAt: h.status === 'onaylandi' ? new Date().toISOString() : null,
+                  })
+                }
+              >
+                Makbuz
+              </button>
               <button className="ghost" onClick={() => deleteHandover(h.id, h.amount)}>Sil</button>
             </div>
           </li>
