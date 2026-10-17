@@ -314,7 +314,7 @@ export function AdminPage({ userId }: Props) {
                     amount: h.amount,
                     note: h.note,
                     status: h.status,
-                    confirmedAt: h.status === 'onaylandi' ? new Date().toISOString() : null,
+                    confirmedAt: h.confirmed_at,
                   })
                 }
               >

@@ -50,4 +50,5 @@ export interface Handover {
   handed_over_at: string;
   status: 'bekliyor' | 'onaylandi';
   note: string | null;
+  confirmed_at: string | null;
 }
