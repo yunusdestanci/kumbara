@@ -5,6 +5,9 @@ import { dateTr, money, monthName } from '../lib/format';
 import { BoxManager } from '../components/BoxManager';
 import { BranchManager } from '../components/BranchManager';
 import { BranchUserForm } from '../components/BranchUserForm';
+import { AdminCollect } from '../components/AdminCollect';
+import { ExpenseManager } from '../components/ExpenseManager';
+import { AuditLog } from '../components/AuditLog';
 
 // Tüm kumbara kayıtları (şube adıyla birlikte, tek sorguda).
 interface CollRow {
@@ -74,7 +77,10 @@ export function AdminPage({ userId }: Props) {
   }
 
   async function closePeriod(id: string) {
-    if (!confirm('Bu dönem kapatılsın mı? Kapanınca şubeler bu dönemde değişiklik yapamaz.')) return;
+    // Kapatmadan önce girilmemiş kumbara var mı kontrol et
+    const uncounted = summary.reduce((s, x) => s + x.notRecorded, 0);
+    const warn = uncounted > 0 ? `Bu dönemde ${uncounted} kumbara için toplama girilmemiş. ` : '';
+    if (!confirm(warn + 'Bu dönem kapatılsın mı? Kapanınca şubeler bu dönemde değişiklik yapamaz.')) return;
     const { error } = await supabase
       .from('periods')
       .update({ status: 'kapali', closed_at: new Date().toISOString() })
@@ -136,6 +142,33 @@ export function AdminPage({ userId }: Props) {
     { activeBoxes: 0, collectedCount: 0, missedCount: 0, notRecorded: 0, periodTotal: 0, remaining: 0, pending: 0 },
   );
 
+  // Dönem özetini Excel'de açılabilen CSV olarak indir (noktalı virgül ayraçlı, Türkçe karakter uyumlu)
+  function exportSummaryCsv() {
+    if (!selected) return;
+    const num = (n: number) => n.toFixed(2).replace('.', ',');
+    const header = ['Şube', 'Kumbara', 'Toplandı', 'Toplanmadı', 'Girilmedi', 'Dönem toplamı', 'Şubede kalan', 'Onay bekleyen'];
+    const lines = summary.map((s) => [
+      s.branch.name,
+      s.activeBoxes,
+      s.collectedCount,
+      s.missedCount,
+      s.notRecorded,
+      num(s.periodTotal),
+      num(s.remaining),
+      num(s.pending),
+    ]);
+    const csv = [header, ...lines]
+      .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';'))
+      .join('\r\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kumbara-${selected.year}-${String(selected.month).padStart(2, '0')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const branchName = (id: string) => branches.find((b) => b.id === id)?.name ?? '—';
 
   return (
@@ -153,6 +186,7 @@ export function AdminPage({ userId }: Props) {
           {selected?.status === 'acik' && (
             <button className="ghost" onClick={() => closePeriod(selected.id)}>Dönemi kapat</button>
           )}
+          {selected && <button className="ghost" onClick={exportSummaryCsv}>CSV indir</button>}
           {!currentExists && <button onClick={openCurrentPeriod}>Bu ayı aç</button>}
         </div>
       </div>
@@ -203,6 +237,12 @@ export function AdminPage({ userId }: Props) {
 
       <BranchManager branches={branches} onChanged={load} />
       <BranchUserForm branches={branches} />
+
+      <AdminCollect branches={branches} period={selected} userId={userId} onChanged={load} />
+
+      <ExpenseManager branches={branches} userId={userId} />
+
+      <AuditLog />
 
       <BoxManager branches={branches} onChanged={load} />
 

@@ -23,19 +23,26 @@ interface Props {
   onChanged: () => void;
 }
 
-// Admin: kumbara ekleme, listeleme, kaldırma ve geri alma.
+// Admin: kumbara ekleme, düzenleme, listeleme, kaldırma ve geri alma.
 export function BoxManager({ branches, onChanged }: Props) {
   const [boxes, setBoxes] = useState<BoxRow[]>([]);
   const [filterBranch, setFilterBranch] = useState('');
   const [showRemoved, setShowRemoved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Form alanları
+  // Yeni kumbara formu
   const [branchId, setBranchId] = useState('');
   const [placeType, setPlaceType] = useState<BoxRow['place_type']>('dukkan');
   const [placeName, setPlaceName] = useState('');
   const [address, setAddress] = useState('');
   const [busy, setBusy] = useState(false);
+
+  // Düzenleme
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [eBranch, setEBranch] = useState('');
+  const [eType, setEType] = useState<BoxRow['place_type']>('dukkan');
+  const [eName, setEName] = useState('');
+  const [eAddress, setEAddress] = useState('');
 
   const loadBoxes = useCallback(async () => {
     const { data, error } = await supabase
@@ -77,6 +84,41 @@ export function BoxManager({ branches, onChanged }: Props) {
     }
     setPlaceName('');
     setAddress('');
+    await loadBoxes();
+    onChanged();
+  }
+
+  function startEdit(b: BoxRow) {
+    setError(null);
+    setEditingId(b.id);
+    setEBranch(b.branch_id);
+    setEType(b.place_type);
+    setEName(b.place_name ?? '');
+    setEAddress(b.address ?? '');
+  }
+
+  async function saveEdit(id: string) {
+    setError(null);
+    if (!eBranch) {
+      setError('Bir şube seçin.');
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase
+      .from('boxes')
+      .update({
+        branch_id: eBranch,
+        place_type: eType,
+        place_name: eName.trim() || null,
+        address: eAddress.trim() || null,
+      })
+      .eq('id', id);
+    setBusy(false);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setEditingId(null);
     await loadBoxes();
     onChanged();
   }
@@ -152,23 +194,49 @@ export function BoxManager({ branches, onChanged }: Props) {
       </div>
 
       <ul className="list">
-        {visible.map((b) => (
-          <li key={b.id} className="card row">
-            <div>
-              <strong>{b.place_name || typeLabel(b.place_type)}</strong>
-              <span className="muted small"> · {typeLabel(b.place_type)} · {branchName(b.branch_id)}</span>
-              {b.address && <div className="muted small">{b.address}</div>}
-            </div>
-            {b.status === 'aktif' ? (
-              <button className="ghost" onClick={() => setStatus(b.id, 'kaldirildi')}>Kaldır</button>
-            ) : (
+        {visible.map((b) =>
+          editingId === b.id ? (
+            <li key={b.id} className="card">
               <div className="form-row">
-                <span className="badge bekliyor">Kaldırıldı</span>
-                <button className="ghost" onClick={() => setStatus(b.id, 'aktif')}>Geri al</button>
+                <select value={eBranch} onChange={(e) => setEBranch(e.target.value)}>
+                  {branches.map((br) => (
+                    <option key={br.id} value={br.id}>{br.name}</option>
+                  ))}
+                </select>
+                <select value={eType} onChange={(e) => setEType(e.target.value as BoxRow['place_type'])}>
+                  {PLACE_TYPES.map((p) => (
+                    <option key={p.value} value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+                <input value={eName} onChange={(e) => setEName(e.target.value)} placeholder="Yer adı" />
+                <input value={eAddress} onChange={(e) => setEAddress(e.target.value)} placeholder="Adres" />
               </div>
-            )}
-          </li>
-        ))}
+              <div className="actions">
+                <button disabled={busy} onClick={() => saveEdit(b.id)}>Kaydet</button>
+                <button className="ghost" onClick={() => setEditingId(null)}>İptal</button>
+              </div>
+            </li>
+          ) : (
+            <li key={b.id} className="card row">
+              <div>
+                <strong>{b.place_name || typeLabel(b.place_type)}</strong>
+                <span className="muted small"> · {typeLabel(b.place_type)} · {branchName(b.branch_id)}</span>
+                {b.address && <div className="muted small">{b.address}</div>}
+              </div>
+              {b.status === 'aktif' ? (
+                <div className="form-row">
+                  <button className="ghost" onClick={() => startEdit(b)}>Düzenle</button>
+                  <button className="ghost" onClick={() => setStatus(b.id, 'kaldirildi')}>Kaldır</button>
+                </div>
+              ) : (
+                <div className="form-row">
+                  <span className="badge bekliyor">Kaldırıldı</span>
+                  <button className="ghost" onClick={() => setStatus(b.id, 'aktif')}>Geri al</button>
+                </div>
+              )}
+            </li>
+          ),
+        )}
         {visible.length === 0 && <p className="muted">Gösterilecek kumbara yok.</p>}
       </ul>
     </section>
