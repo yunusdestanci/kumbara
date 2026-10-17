@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import type { Box, Branch, Handover, Period } from '../lib/types';
 import { dateTr, money, monthName } from '../lib/format';
 import { BoxManager } from '../components/BoxManager';
+import { BranchManager } from '../components/BranchManager';
 
 // Tüm kumbara kayıtları (şube adıyla birlikte, tek sorguda).
 interface CollRow {
@@ -198,6 +199,8 @@ export function AdminPage({ userId }: Props) {
           </tbody>
         </table>
       </div>
+
+      <BranchManager branches={branches} onChanged={load} />
 
       <BoxManager branches={branches} onChanged={load} />
 
