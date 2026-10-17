@@ -209,6 +209,8 @@ export function Reports({ branches, embedded = false, periodId: presetPeriodId }
       })
       .sort((a, b) => b.total - a.total);
     const maxTotal = Math.max(...rows.map((r) => r.total), 0);
+    // Yüzde: a'nın b'ye oranı, bir ondalık basamakla
+    const pct = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 1000) / 10 : 0);
 
     return (
       <>
@@ -229,7 +231,8 @@ export function Reports({ branches, embedded = false, periodId: presetPeriodId }
         {monthLoaded && p && (
           <>
             <section className="stats">
-              <Stat label="Toplanan" value={money(collectedTotal)} />
+              <Stat label="Toplam toplanan" value={money(collectedTotal)} />
+              <Stat label="Toplama oranı" value={`%${pct(collected.length, activeBoxes.length)}`} />
               <Stat label="Toplandı" value={`${collected.length} / ${activeBoxes.length}`} />
               <Stat label="Toplanmadı" value={String(missed.length)} />
               <Stat label="Girilmedi" value={String(notRecorded)} />
@@ -249,7 +252,9 @@ export function Reports({ branches, embedded = false, periodId: presetPeriodId }
                     <th>Toplanmadı</th>
                     <th>Girilmedi</th>
                     <th>Teslim</th>
-                    <th style={{ minWidth: 120 }}>Oran</th>
+                    <th>Pay</th>
+                    <th>Toplama oranı</th>
+                    <th style={{ minWidth: 120 }}>Grafik</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -261,6 +266,8 @@ export function Reports({ branches, embedded = false, periodId: presetPeriodId }
                       <td>{r.missed}</td>
                       <td>{r.notRec}</td>
                       <td>{money(r.handed)}</td>
+                      <td>%{pct(r.total, collectedTotal)}</td>
+                      <td>%{pct(r.collected, r.active)}</td>
                       <td><Bar value={r.total} max={maxTotal} /></td>
                     </tr>
                   ))}
