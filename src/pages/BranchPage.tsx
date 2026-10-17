@@ -91,13 +91,9 @@ export function BranchPage({ branchId, userId }: Props) {
   const missed = collections.filter((c) => c.status === 'toplanmadi');
   const collectedTotal = collected.reduce((s, c) => s + (c.amount ?? 0), 0);
   const pendingCount = boxes.length - collected.length - missed.length;
-  const approvedHandedTotal = handovers
-    .filter((h) => h.status === 'onaylandi')
-    .reduce((s, h) => s + h.amount, 0);
   // Bekleyen teslimler de bakiyeden düşülür, aynı parayı iki kez teslim edilemesin
   const handedAllTotal = handovers.reduce((s, h) => s + h.amount, 0);
   const remainingInBranch = allCollectedTotal - handedAllTotal;
-  void approvedHandedTotal;
 
   return (
     <>
