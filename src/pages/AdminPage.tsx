@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Box, Branch, Handover, Period } from '../lib/types';
 import { dateTr, money, monthName } from '../lib/format';
+import { BoxManager } from '../components/BoxManager';
 
 // Tüm kumbara kayıtları (şube adıyla birlikte, tek sorguda).
 interface CollRow {
@@ -197,6 +198,8 @@ export function AdminPage({ userId }: Props) {
           </tbody>
         </table>
       </div>
+
+      <BoxManager branches={branches} onChanged={load} />
 
       <h3>Teslim kayıtları</h3>
       <ul className="list">
