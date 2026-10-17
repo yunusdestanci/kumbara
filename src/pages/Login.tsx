@@ -19,8 +19,9 @@ export function Login() {
   return (
     <div className="center">
       <form className="card login" onSubmit={submit}>
-        <img src="/logo.png" alt="Serhendi Vakfı" style={{ width: 120, display: 'block', margin: '0 auto 8px' }} />
-        <h1>Kumbara Takip</h1>
+        <img src="/logo.png" alt="Serhendi Vakfı" style={{ width: 200, display: 'block', margin: '0 auto 4px' }} />
+        <h1 style={{ textAlign: 'center', marginBottom: 2 }}>Serhendi Halkalı</h1>
+        <p className="muted small" style={{ textAlign: 'center', marginTop: 0 }}>Kumbara Takip</p>
         <label>
           E-posta
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="username" />

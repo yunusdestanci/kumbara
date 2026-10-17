@@ -323,7 +323,10 @@ export function AdminPage({ userId }: Props) {
       <nav className="admin-nav">
         <div className="brand">
           <img src="/logo.png" alt="Serhendi Vakfı" />
-          <span>Kumbara · Merkez</span>
+          <span>
+            <strong style={{ display: 'block', lineHeight: 1.2 }}>Serhendi Halkalı</strong>
+            <small style={{ opacity: 0.85, fontWeight: 400 }}>Kumbara · Merkez</small>
+          </span>
         </div>
         {MENU.map((m) => (
           <button

@@ -29,8 +29,9 @@
 }
 
 .admin-nav .brand img {
-  width: 40px;
-  height: 40px;
+  width: 64px;
+  height: 64px;
+  flex: none;
   background: #fff;
   border-radius: 8px;
   padding: 3px;
@@ -142,6 +143,13 @@
     gap: 6px;
   }
   .admin-nav .brand {
+    padding: 0 6px 0 0;
+  }
+  .admin-nav .brand img {
+    width: 44px;
+    height: 44px;
+  }
+  .admin-nav .brand span {
     display: none;
   }
   .admin-nav-item {
