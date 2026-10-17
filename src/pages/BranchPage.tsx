@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import type { Box, Collection, Handover, Period } from '../lib/types';
 import { dateTr, money, monthName, parseAmount } from '../lib/format';
 import { AddBoxForm } from '../components/AddBoxForm';
+import { PasswordChange } from '../components/PasswordChange';
 
 interface Props {
   branchId: string;
@@ -22,6 +23,17 @@ export function BranchPage({ branchId, userId }: Props) {
   const [handovers, setHandovers] = useState<Handover[]>([]);
   const [allCollectedTotal, setAllCollectedTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // null: henüz kontrol edilmedi, true: ilk girişte şifre değiştirilmeli
+  const [mustChange, setMustChange] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from('profiles')
+      .select('must_change_password')
+      .eq('id', userId)
+      .maybeSingle()
+      .then(({ data }) => setMustChange(data?.must_change_password ?? false));
+  }, [userId]);
 
   const load = useCallback(async () => {
     setError(null);
@@ -65,6 +77,11 @@ export function BranchPage({ branchId, userId }: Props) {
   }, [load]);
 
   if (error) return <p className="error">{error}</p>;
+
+  if (mustChange === null) return <p className="muted">Yükleniyor…</p>;
+  if (mustChange) {
+    return <PasswordChange required onDone={() => setMustChange(false)} />;
+  }
 
   const byBox = new Map(collections.map((c) => [c.box_id, c]));
   const collected = collections.filter((c) => c.status === 'toplandi');
@@ -120,6 +137,8 @@ export function BranchPage({ branchId, userId }: Props) {
         handovers={handovers}
         onSaved={load}
       />
+
+      <PasswordChange required={false} onDone={() => {}} />
     </>
   );
 }

@@ -122,8 +122,8 @@ export function BranchUserForm({ branches }: Props) {
       {msg && <p className={msg.type === 'ok' ? 'badge onaylandi' : 'error'}>{msg.text}</p>}
       <p className="muted small">
         {isCreate
-          ? 'Şifreyi şubeye ilet. Şube ilk girişte şifreyi değiştirmeli (bu özellik sonraki adımda eklenebilir).'
-          : 'Sadece değiştirmek istediğiniz alanı doldurun. Şifre en az 8 karakter olmalı.'}
+          ? 'Şifreyi şubeye ilet. Şube ilk girişte kendi yeni şifresini belirlemek zorunda.'
+          : 'Sadece değiştirmek istediğiniz alanı doldurun. Şifre en az 8 karakter olmalı. Şifre değişirse şube bir sonraki girişte yeni şifre belirler.'}
       </p>
     </form>
   );

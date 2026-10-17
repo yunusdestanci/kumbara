@@ -101,6 +101,11 @@ Deno.serve(async (req) => {
     const { error: updErr } = await admin.auth.admin.updateUserById(branchUser.id, changes);
     if (updErr) return json({ error: updErr.message }, 400);
 
+    // Admin şifre belirlediyse şube bir sonraki girişte yeni şifre seçmek zorunda
+    if (password) {
+      await admin.from('profiles').update({ must_change_password: true }).eq('id', branchUser.id);
+    }
+
     return json({ ok: true, email: email || null });
   }
 
@@ -122,6 +127,7 @@ Deno.serve(async (req) => {
     full_name: fullName,
     role: 'branch',
     branch_id: branchId,
+    must_change_password: true,
   });
   if (profileErr) {
     await admin.auth.admin.deleteUser(created.user.id);
