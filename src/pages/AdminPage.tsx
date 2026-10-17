@@ -37,6 +37,8 @@ export function AdminPage({ userId }: Props) {
   const [error, setError] = useState<string | null>(null);
   // Veriler gelene kadar "dönem yok" uyarısı ve "Bu ayı aç" butonu gösterilmesin
   const [loaded, setLoaded] = useState(false);
+  // Ekran: ana sayfa veya ayrı işlem geçmişi sayfası
+  const [view, setView] = useState<'home' | 'log'>('home');
 
   const load = useCallback(async () => {
     setError(null);
@@ -174,8 +176,25 @@ export function AdminPage({ userId }: Props) {
 
   const branchName = (id: string) => branches.find((b) => b.id === id)?.name ?? '—';
 
+  const nav = (
+    <div className="form-row" style={{ marginBottom: 12 }}>
+      <button className={view === 'home' ? '' : 'ghost'} onClick={() => setView('home')}>Ana sayfa</button>
+      <button className={view === 'log' ? '' : 'ghost'} onClick={() => setView('log')}>İşlem geçmişi</button>
+    </div>
+  );
+
+  if (view === 'log') {
+    return (
+      <>
+        {nav}
+        <AuditLog />
+      </>
+    );
+  }
+
   return (
     <>
+      {nav}
       <div className="row">
         <h2>Merkez özeti</h2>
         <div className="form-row">
@@ -244,8 +263,6 @@ export function AdminPage({ userId }: Props) {
       <AdminCollect branches={branches} period={selected} userId={userId} onChanged={load} />
 
       <ExpenseManager branches={branches} userId={userId} />
-
-      <AuditLog />
 
       <BoxManager branches={branches} onChanged={load} />
 
