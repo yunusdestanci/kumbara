@@ -4,6 +4,7 @@ import type { Box, Branch, Handover, Period } from '../lib/types';
 import { dateTr, money, monthName } from '../lib/format';
 import { BoxManager } from '../components/BoxManager';
 import { BranchManager } from '../components/BranchManager';
+import { BranchUserForm } from '../components/BranchUserForm';
 
 // Tüm kumbara kayıtları (şube adıyla birlikte, tek sorguda).
 interface CollRow {
@@ -201,6 +202,7 @@ export function AdminPage({ userId }: Props) {
       </div>
 
       <BranchManager branches={branches} onChanged={load} />
+      <BranchUserForm branches={branches} />
 
       <BoxManager branches={branches} onChanged={load} />
 
