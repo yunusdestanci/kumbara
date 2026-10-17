@@ -84,6 +84,7 @@ export function Reports({ branches, embedded = false, periodId: presetPeriodId }
   const [branchColls, setBranchColls] = useState<CollRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [monthLoaded, setMonthLoaded] = useState(false);
 
   // Dışarıdan dönem gelirse (ana sayfa) onu kullan
   useEffect(() => {
@@ -118,6 +119,7 @@ export function Reports({ branches, embedded = false, periodId: presetPeriodId }
   // Seçili ayın toplamaları
   useEffect(() => {
     if (!periodId) return;
+    setMonthLoaded(false);
     fetchAll<CollRow>((a, b) =>
       supabase
         .from('collections')
@@ -125,7 +127,10 @@ export function Reports({ branches, embedded = false, periodId: presetPeriodId }
         .eq('period_id', periodId)
         .range(a, b),
     )
-      .then(setMonthColls)
+      .then((rows) => {
+        setMonthColls(rows);
+        setMonthLoaded(true);
+      })
       .catch((e) => setErr((e as Error).message));
   }, [periodId]);
 
@@ -218,9 +223,10 @@ export function Reports({ branches, embedded = false, periodId: presetPeriodId }
           </select>
         </div>}
 
-        {!p && <p className="muted">Henüz dönem yok.</p>}
+        {!monthLoaded && <p className="muted">Rapor hazırlanıyor…</p>}
+        {monthLoaded && !p && <p className="muted">Henüz dönem yok.</p>}
 
-        {p && (
+        {monthLoaded && p && (
           <>
             <section className="stats">
               <Stat label="Toplanan" value={money(collectedTotal)} />

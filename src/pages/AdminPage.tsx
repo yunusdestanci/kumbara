@@ -50,6 +50,8 @@ export function AdminPage({ userId }: Props) {
   const [periodRows, setPeriodRows] = useState<CollRow[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [loaded, setLoaded] = useState(false);
+  // Seçili dönemin toplamaları gelmeden "girilmedi" uyarısı gösterilmesin
+  const [periodLoaded, setPeriodLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -98,6 +100,7 @@ export function AdminPage({ userId }: Props) {
           .range(a, z),
       );
       setPeriodRows(rows);
+      setPeriodLoaded(true);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -108,6 +111,7 @@ export function AdminPage({ userId }: Props) {
   }, [load]);
 
   useEffect(() => {
+    setPeriodLoaded(false);
     loadPeriodRows();
   }, [loadPeriodRows]);
 
@@ -256,7 +260,7 @@ export function AdminPage({ userId }: Props) {
               </div>
             </div>
           )}
-          {selected?.status === 'acik' && totals.notRecorded > 0 && (
+          {periodLoaded && selected?.status === 'acik' && totals.notRecorded > 0 && (
             <div className="alert">
               <strong>{totals.notRecorded} kumbara girilmedi</strong>
               Bu dönemde bazı kumbaralar için toplama girilmemiş.
