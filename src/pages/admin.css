@@ -1,0 +1,145 @@
+/* Admin paneli düzeni: sol menü (masaüstü) / üst yatay menü (telefon) */
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-nav {
+  width: 220px;
+  flex: none;
+  background: #1f6f4a;
+  color: #fff;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.admin-nav .brand {
+  font-weight: 700;
+  font-size: 18px;
+  padding: 4px 10px 16px;
+}
+
+.admin-nav-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 15px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.admin-nav-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.admin-nav-item.active {
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: 600;
+}
+
+.admin-nav-item .count {
+  background: #fff;
+  color: #1f6f4a;
+  border-radius: 999px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-nav .logout {
+  margin-top: auto;
+  opacity: 0.85;
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  padding: 20px 24px;
+  box-sizing: border-box;
+}
+
+.admin-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.admin-top h2 {
+  margin: 0;
+}
+
+.admin-periodbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.alert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.alert {
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #fff7e6;
+  border: 1px solid #f5d28a;
+}
+
+.alert.info {
+  background: #eef6f1;
+  border-color: #bfe0cf;
+}
+
+.alert strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 760px) {
+  .admin-shell {
+    flex-direction: column;
+  }
+  .admin-nav {
+    width: auto;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+    gap: 6px;
+  }
+  .admin-nav .brand {
+    display: none;
+  }
+  .admin-nav-item {
+    width: auto;
+    white-space: nowrap;
+  }
+  .admin-nav .logout {
+    margin-top: 0;
+  }
+  .admin-main {
+    padding: 14px 16px;
+  }
+}
