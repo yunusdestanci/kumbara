@@ -161,5 +161,34 @@
   }
   .admin-main {
     padding: 14px 16px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  .admin-main .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .admin-main .stat {
+    min-width: 0;
+    padding: 10px;
+  }
+  .admin-main .stat-value {
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+  .admin-main .alert-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-main .table-wrap {
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-main .table-wrap th,
+  .admin-main .table-wrap td {
+    padding: 8px 10px;
+  }
+  .admin-main .admin-top h2 {
+    font-size: 1.25rem;
   }
 }
