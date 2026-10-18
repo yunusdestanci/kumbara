@@ -4,11 +4,22 @@ import type { Box, Collection, Handover, Period } from '../lib/types';
 import { dateTr, money, monthName, parseAmount } from '../lib/format';
 import { AddBoxForm } from '../components/AddBoxForm';
 import { PasswordChange } from '../components/PasswordChange';
+import './branch.css';
 
 interface Props {
   branchId: string;
   userId: string;
 }
+
+type Tab = 'ozet' | 'kumbara' | 'teslim' | 'harcama' | 'hesap';
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'ozet', label: 'Özet' },
+  { id: 'kumbara', label: 'Kumbaralar' },
+  { id: 'teslim', label: 'Teslim' },
+  { id: 'harcama', label: 'Harcama' },
+  { id: 'hesap', label: 'Hesabım' },
+];
 
 // Şube ekranı: RLS sayesinde sadece kendi şubesinin kumbara ve kayıtları gelir.
 export function BranchPage({ branchId, userId }: Props) {
@@ -16,6 +27,7 @@ export function BranchPage({ branchId, userId }: Props) {
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
 
+  const [tab, setTab] = useState<Tab>('ozet');
   const [branchName, setBranchName] = useState('');
   const [period, setPeriod] = useState<Period | null>(null);
   const [boxes, setBoxes] = useState<Box[]>([]);
@@ -96,53 +108,87 @@ export function BranchPage({ branchId, userId }: Props) {
   const remainingInBranch = allCollectedTotal - handedAllTotal;
 
   return (
-    <>
+    <div className="branch-page">
       <h2>
         {branchName} · {monthName(month)} {year}
       </h2>
 
-      {loaded && !period && (
-        <div className="card warn">
-          Bu ay için dönem henüz açılmamış. Merkez yönetici dönemi açtığında toplama girebilirsiniz.
-        </div>
+      {tab === 'ozet' && (
+        <>
+          {loaded && !period && (
+            <div className="card warn">
+              Bu ay için dönem henüz açılmamış. Merkez yönetici dönemi açtığında toplama girebilirsiniz.
+            </div>
+          )}
+
+          <section className="stats">
+            <Stat label="Bu ay toplanan" value={money(collectedTotal)} />
+            <Stat label="Toplandı" value={`${collected.length} / ${boxes.length}`} />
+            <Stat label="Toplanmadı" value={String(missed.length)} />
+            <Stat label="Bekliyor" value={String(Math.max(pendingCount, 0))} />
+            <Stat label="Teslim edilebilir bakiye" value={money(remainingInBranch)} />
+          </section>
+
+          {period && pendingCount > 0 && (
+            <button className="branch-cta" onClick={() => setTab('kumbara')}>
+              Bekleyen {pendingCount} kumbara için toplama gir
+            </button>
+          )}
+        </>
       )}
 
-      <section className="stats">
-        <Stat label="Bu ay toplanan" value={money(collectedTotal)} />
-        <Stat label="Toplandı" value={`${collected.length} / ${boxes.length}`} />
-        <Stat label="Toplanmadı" value={String(missed.length)} />
-        <Stat label="Bekliyor" value={String(Math.max(pendingCount, 0))} />
-        <Stat label="Teslim edilebilir bakiye" value={money(remainingInBranch)} />
-      </section>
+      {tab === 'kumbara' && (
+        <>
+          <h3>Kumbaralar</h3>
+          {loaded && !period && (
+            <div className="card warn">Dönem açılmadan toplama girilemez.</div>
+          )}
+          <div className="list">
+            {boxes.map((box) => (
+              <BoxRow
+                key={box.id}
+                box={box}
+                collection={byBox.get(box.id)}
+                periodId={period?.id ?? null}
+                userId={userId}
+                onSaved={load}
+              />
+            ))}
+            {boxes.length === 0 && <p className="muted">Bu şubeye atanmış aktif kumbara yok.</p>}
+          </div>
 
-      <h3>Kumbaralar</h3>
-      <div className="list">
-        {boxes.map((box) => (
-          <BoxRow
-            key={box.id}
-            box={box}
-            collection={byBox.get(box.id)}
-            periodId={period?.id ?? null}
-            userId={userId}
-            onSaved={load}
-          />
+          <AddBoxForm branchId={branchId} onAdded={load} />
+        </>
+      )}
+
+      {tab === 'teslim' && (
+        <HandoverSection
+          branchId={branchId}
+          periodId={period?.id ?? null}
+          userId={userId}
+          handovers={handovers}
+          available={remainingInBranch}
+          onSaved={load}
+        />
+      )}
+
+      {tab === 'harcama' && <BranchExpenses branchId={branchId} />}
+
+      {tab === 'hesap' && <PasswordChange required={false} onDone={() => {}} />}
+
+      <nav className="branch-nav" aria-label="Şube menüsü">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={tab === t.id ? 'active' : ''}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
         ))}
-        {boxes.length === 0 && <p className="muted">Bu şubeye atanmış aktif kumbara yok.</p>}
-      </div>
-
-      <AddBoxForm branchId={branchId} onAdded={load} />
-
-      <HandoverSection
-        branchId={branchId}
-        periodId={period?.id ?? null}
-        userId={userId}
-        handovers={handovers}
-        available={remainingInBranch}
-        onSaved={load}
-      />
-
-      <PasswordChange required={false} onDone={() => {}} />
-    </>
+      </nav>
+    </div>
   );
 }
 
@@ -333,6 +379,7 @@ function HandoverSection({ branchId, periodId, userId, handovers, available, onS
   return (
     <section>
       <h3>Merkeze teslim</h3>
+      <p className="muted small">Teslim edilebilir bakiye: {money(available)}</p>
       <form className="card" onSubmit={submit}>
         <div className="form-row">
           <input
@@ -364,6 +411,62 @@ function HandoverSection({ branchId, periodId, userId, handovers, available, onS
           </li>
         ))}
         {handovers.length === 0 && <p className="muted">Henüz teslim kaydı yok.</p>}
+      </ul>
+    </section>
+  );
+}
+
+interface ExpenseRow {
+  id: string;
+  amount: number;
+  category: string;
+  description: string | null;
+  spent_on: string;
+}
+
+// Şube harcamaları salt okunur: yazma yetkisi yalnızca merkez yöneticide.
+function BranchExpenses({ branchId }: { branchId: string }) {
+  const [rows, setRows] = useState<ExpenseRow[] | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from('expenses')
+      .select('id,amount,category,description,spent_on')
+      .eq('branch_id', branchId)
+      .order('spent_on', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) setErr(error.message);
+        else setRows((data ?? []) as ExpenseRow[]);
+      });
+  }, [branchId]);
+
+  if (err) return <p className="error">{err}</p>;
+  if (!rows) return <p className="muted">Yükleniyor…</p>;
+
+  const total = rows.reduce((s, r) => s + Number(r.amount), 0);
+
+  return (
+    <section>
+      <h3>Harcamalar</h3>
+      <p className="muted small">Harcama kayıtlarını merkez yönetici girer. Burada şubenizin harcamalarını görürsünüz.</p>
+      <section className="stats">
+        <Stat label="Toplam harcama" value={money(total)} />
+        <Stat label="Kayıt sayısı" value={String(rows.length)} />
+      </section>
+      <ul className="list">
+        {rows.map((r) => (
+          <li key={r.id} className="card row">
+            <div>
+              <strong>{money(Number(r.amount))}</strong>
+              <div className="muted small">
+                {r.category} · {dateTr(r.spent_on)}
+                {r.description ? ` · ${r.description}` : ''}
+              </div>
+            </div>
+          </li>
+        ))}
+        {rows.length === 0 && <p className="muted">Henüz harcama kaydı yok.</p>}
       </ul>
     </section>
   );
