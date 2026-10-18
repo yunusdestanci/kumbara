@@ -51,3 +51,4 @@ Vercel veya Netlify'a bağla. HTTPS sertifikası otomatik gelir, tarayıcıda g�
 - Kumbara ekleme/düzenleme ekranı (şimdilik Supabase panelinden)
 - Harcama ekranı ve fiş yükleme
 - PWA ikonları (`public/` klasörüne 192 ve 512 piksel ikon eklenmeli)
+- 
