@@ -11,6 +11,8 @@ export interface Branch {
   id: string;
   name: string;
   district: string | null;
+  responsible_name: string | null;
+  active: boolean;
 }
 
 export interface Box {
