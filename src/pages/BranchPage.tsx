@@ -28,6 +28,8 @@ export function BranchPage({ branchId, userId }: Props) {
   const month = now.getMonth() + 1;
 
   const [tab, setTab] = useState<Tab>('ozet');
+  // Yan menünün açık/kapalı durumu
+  const [menuOpen, setMenuOpen] = useState(false);
   const [branchName, setBranchName] = useState('');
   const [period, setPeriod] = useState<Period | null>(null);
   const [boxes, setBoxes] = useState<Box[]>([]);
@@ -109,6 +111,31 @@ export function BranchPage({ branchId, userId }: Props) {
 
   return (
     <div className="branch-page">
+      <header className="branch-topbar">
+        <strong>{TABS.find((t) => t.id === tab)?.label}</strong>
+        <button className="branch-menu-btn" aria-label="Menüyü aç" onClick={() => setMenuOpen(true)}>
+          ☰
+        </button>
+      </header>
+
+      {menuOpen && <div className="branch-backdrop" onClick={() => setMenuOpen(false)} />}
+      <nav className={`branch-drawer ${menuOpen ? 'open' : ''}`} aria-label="Şube menüsü">
+        <div className="branch-drawer-title">{branchName || 'Şube'}</div>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            className={tab === t.id ? 'active' : ''}
+            onClick={() => {
+              setTab(t.id);
+              setMenuOpen(false);
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
       <h2>
         {branchName} · {monthName(month)} {year}
       </h2>
@@ -176,18 +203,6 @@ export function BranchPage({ branchId, userId }: Props) {
 
       {tab === 'hesap' && <PasswordChange required={false} onDone={() => {}} />}
 
-      <nav className="branch-nav" aria-label="Şube menüsü">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            className={tab === t.id ? 'active' : ''}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
     </div>
   );
 }
