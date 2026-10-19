@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { fetchAll } from '../lib/fetchAll';
-import { dateTr, money } from '../lib/format';
+import { dateTr, money, parseAmount } from '../lib/format';
 
 interface HandoverRow {
   id: string;
@@ -19,6 +19,14 @@ interface ExpenseRow {
   spent_on: string;
 }
 
+interface IncomeRow {
+  id: string;
+  amount: number;
+  received_on: string;
+  source: string;
+  description: string | null;
+}
+
 interface Movement {
   date: string; // YYYY-MM-DD
   kind: 'giris' | 'cikis';
@@ -26,10 +34,12 @@ interface Movement {
   amount: number;
 }
 
+const SOURCES = ['Bağış', 'Banka transferi', 'Diğer'];
+
 const pad = (n: number) => String(n).padStart(2, '0');
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-// Merkez kasa: onaylanan şube teslimleri giriş, genel merkez harcamaları çıkış.
+// Merkez kasa: onaylanan şube teslimleri ve dış girişler giriş, genel merkez harcamaları çıkış.
 export function CentralCash() {
   const [from, setFrom] = useState(() => {
     const d = new Date();
@@ -38,44 +48,59 @@ export function CentralCash() {
   const [to, setTo] = useState(() => iso(new Date()));
   const [handovers, setHandovers] = useState<HandoverRow[]>([]);
   const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
+  const [incomes, setIncomes] = useState<IncomeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([
-      fetchAll<HandoverRow>((a, b) =>
-        supabase
-          .from('handovers')
-          .select('id,amount,confirmed_at,note,branch:branches(name)')
-          .eq('status', 'onaylandi')
-          .order('confirmed_at', { ascending: true })
-          .range(a, b),
-      ),
-      fetchAll<ExpenseRow>((a, b) =>
-        supabase
-          .from('expenses')
-          .select('id,amount,category,description,spent_on')
-          .is('branch_id', null)
-          .order('spent_on', { ascending: true })
-          .range(a, b),
-      ),
-    ])
-      .then(([h, e]) => {
-        if (cancelled) return;
-        setHandovers(h);
-        setExpenses(e);
-      })
-      .catch((x: Error) => {
-        if (!cancelled) setErr(x.message);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+  // Giriş formu
+  const [amount, setAmount] = useState('');
+  const [receivedOn, setReceivedOn] = useState(() => iso(new Date()));
+  const [source, setSource] = useState(SOURCES[0]);
+  const [description, setDescription] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [formErr, setFormErr] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setErr(null);
+    try {
+      const [h, e, i] = await Promise.all([
+        fetchAll<HandoverRow>((a, b) =>
+          supabase
+            .from('handovers')
+            .select('id,amount,confirmed_at,note,branch:branches(name)')
+            .eq('status', 'onaylandi')
+            .order('confirmed_at', { ascending: true })
+            .range(a, b),
+        ),
+        fetchAll<ExpenseRow>((a, b) =>
+          supabase
+            .from('expenses')
+            .select('id,amount,category,description,spent_on')
+            .is('branch_id', null)
+            .order('spent_on', { ascending: true })
+            .range(a, b),
+        ),
+        fetchAll<IncomeRow>((a, b) =>
+          supabase
+            .from('central_incomes')
+            .select('id,amount,received_on,source,description')
+            .order('received_on', { ascending: true })
+            .range(a, b),
+        ),
+      ]);
+      setHandovers(h);
+      setExpenses(e);
+      setIncomes(i);
+    } catch (x) {
+      setErr((x as Error).message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const statement = useMemo(() => {
     const moves: Movement[] = [];
@@ -87,6 +112,14 @@ export function CentralCash() {
         kind: 'giris',
         text: `${branchName ?? 'Şube'} teslimi${h.note ? ` · ${h.note}` : ''}`,
         amount: Number(h.amount),
+      });
+    }
+    for (const i of incomes) {
+      moves.push({
+        date: i.received_on,
+        kind: 'giris',
+        text: `${i.source}${i.description ? ` · ${i.description}` : ''}`,
+        amount: Number(i.amount),
       });
     }
     for (const e of expenses) {
@@ -122,7 +155,36 @@ export function CentralCash() {
     }
 
     return { opening, rows, totalIn, totalOut, closing: running };
-  }, [handovers, expenses, from, to]);
+  }, [handovers, expenses, incomes, from, to]);
+
+  async function addIncome(e: FormEvent) {
+    e.preventDefault();
+    setFormErr(null);
+    const n = parseAmount(amount);
+    if (n === null || n <= 0) {
+      setFormErr('Geçerli bir tutar girin.');
+      return;
+    }
+    if (!source) {
+      setFormErr('Kaynak seçin.');
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.from('central_incomes').insert({
+      amount: n,
+      received_on: receivedOn,
+      source,
+      description: description.trim() || null,
+    });
+    setBusy(false);
+    if (error) {
+      setFormErr(error.message);
+      return;
+    }
+    setAmount('');
+    setDescription('');
+    load();
+  }
 
   function exportCsv() {
     const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
@@ -154,8 +216,34 @@ export function CentralCash() {
     <section>
       <h3>Merkez kasa ekstresi</h3>
       <p className="muted small">
-        Giriş: merkez yöneticinin onayladığı şube teslimleri. Çıkış: genel merkez harcamaları.
+        Giriş: onaylanan şube teslimleri ve dış girişler. Çıkış: genel merkez harcamaları.
       </p>
+
+      <form className="card" onSubmit={addIncome}>
+        <strong>Kasaya dış giriş ekle</strong>
+        <div className="form-row">
+          <input
+            inputMode="decimal"
+            placeholder="Tutar (₺)"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            required
+          />
+          <input type="date" value={receivedOn} onChange={(e) => setReceivedOn(e.target.value)} required />
+          <select value={source} onChange={(e) => setSource(e.target.value)}>
+            {SOURCES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <input
+            placeholder="Açıklama (isteğe bağlı)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <button type="submit" disabled={busy}>Kaydet</button>
+        </div>
+        {formErr && <p className="error">{formErr}</p>}
+      </form>
 
       <div className="form-row">
         <label>
