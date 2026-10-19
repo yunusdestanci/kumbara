@@ -55,7 +55,8 @@ export function AdminCollect({ branches, period, userId, onChanged }: Props) {
 
   return (
     <section>
-      <h3>Toplama girişi (admin)</h3>
+      <h3>Toplama durumu</h3>
+      <p className="muted small">Toplamayı şube hesabı girer. Yönetici burada sadece görür, değişiklik yapamaz.</p>
       <div className="form-row" style={{ marginBottom: 10 }}>
         <select value={branchId} onChange={(e) => setBranchId(e.target.value)}>
           {branches.map((b) => (
@@ -72,7 +73,7 @@ export function AdminCollect({ branches, period, userId, onChanged }: Props) {
             key={box.id}
             box={box}
             collection={byBox.get(box.id)}
-            periodId={period?.id ?? null}
+            periodId={null}
             userId={userId}
             onSaved={() => {
               load();

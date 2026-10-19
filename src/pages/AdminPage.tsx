@@ -21,7 +21,7 @@ const MENU: { key: Section; label: string }[] = [
   { key: 'ana', label: 'Ana sayfa' },
   { key: 'subeler', label: 'Şubeler' },
   { key: 'kumbara', label: 'Kumbaralar' },
-  { key: 'toplama', label: 'Toplama girişi' },
+  { key: 'toplama', label: 'Toplama durumu' },
   { key: 'teslim', label: 'Teslimler' },
   { key: 'harcama', label: 'Harcamalar' },
   { key: 'kasa', label: 'Merkez kasa' },
