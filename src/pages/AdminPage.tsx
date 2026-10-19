@@ -10,10 +10,11 @@ import { AdminCollect } from '../components/AdminCollect';
 import { ExpenseManager } from '../components/ExpenseManager';
 import { Reports } from '../components/Reports';
 import { AuditLog } from '../components/AuditLog';
+import { CentralCash } from '../components/CentralCash';
 import { printReceipt } from '../lib/receipt';
 import './admin.css';
 
-type Section = 'ana' | 'subeler' | 'kumbara' | 'toplama' | 'teslim' | 'harcama' | 'rapor' | 'gecmis';
+type Section = 'ana' | 'subeler' | 'kumbara' | 'toplama' | 'teslim' | 'harcama' | 'kasa' | 'rapor' | 'gecmis';
 
 const MENU: { key: Section; label: string }[] = [
   { key: 'ana', label: 'Ana sayfa' },
@@ -22,6 +23,7 @@ const MENU: { key: Section; label: string }[] = [
   { key: 'toplama', label: 'Toplama girişi' },
   { key: 'teslim', label: 'Teslimler' },
   { key: 'harcama', label: 'Harcamalar' },
+  { key: 'kasa', label: 'Merkez kasa' },
   { key: 'rapor', label: 'Raporlar' },
   { key: 'gecmis', label: 'İşlem geçmişi' },
 ];
@@ -329,6 +331,8 @@ export function AdminPage({ userId }: Props) {
     );
   } else if (section === 'harcama') {
     content = <ExpenseManager branches={branches} userId={userId} />;
+  } else if (section === 'kasa') {
+    content = <CentralCash />;
   } else if (section === 'rapor') {
     content = <Reports branches={branches} />;
   } else {
