@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Box, Collection, Handover, Period } from '../lib/types';
-import { dateTr, money, monthName, parseAmount } from '../lib/format';
+import { dateTr, mapsUrl, money, monthName, parseAmount } from '../lib/format';
 import { AddBoxForm } from '../components/AddBoxForm';
 import { PasswordChange } from '../components/PasswordChange';
 import './branch.css';
@@ -301,7 +301,11 @@ function BoxRow({ box, collection, periodId, userId, onSaved }: BoxRowProps) {
       <div className="box-head">
         <div>
           <strong>{label}</strong>
-          {box.address && <div className="muted small">{box.address}</div>}
+          {box.address && (
+            <div className="muted small">
+              {box.address} · <a href={mapsUrl(box.address)} target="_blank" rel="noreferrer">Haritada aç</a>
+            </div>
+          )}
         </div>
         <span className={`badge ${status}`}>{statusText}</span>
       </div>

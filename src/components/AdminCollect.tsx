@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Box, Branch, Collection, Period } from '../lib/types';
-import { money, parseAmount } from '../lib/format';
+import { mapsUrl, money, parseAmount } from '../lib/format';
 
 interface Props {
   branches: Branch[];
@@ -167,7 +167,11 @@ function AdminCollectRow({ box, collection, periodId, userId, onSaved }: RowProp
       <div className="box-head">
         <div>
           <strong>{label}</strong>
-          {box.place_name && box.address && <div className="muted small">{box.address}</div>}
+          {box.place_name && box.address && (
+            <div className="muted small">
+              {box.address} · <a href={mapsUrl(box.address)} target="_blank" rel="noreferrer">Haritada aç</a>
+            </div>
+          )}
         </div>
         <span className={`badge ${status}`}>{statusText}</span>
       </div>

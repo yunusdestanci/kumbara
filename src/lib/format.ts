@@ -18,3 +18,7 @@ export const parseAmount = (raw: string): number | null => {
   const n = Number(raw.replace(',', '.').trim());
   return Number.isFinite(n) && n >= 0 ? n : null;
 };
+
+// Adresi Google Haritalar'da arama bağlantısına çevirir (yeni sekmede açılır, API anahtarı gerektirmez).
+export const mapsUrl = (address: string): string =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;

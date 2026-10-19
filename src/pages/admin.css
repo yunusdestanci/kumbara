@@ -262,3 +262,12 @@
     font-size: 1.25rem;
   }
 }
+
+/* Yazdırma: sadece merkez kasa ekstresi çıkar (Yazdır / PDF) */
+@media print {
+  body * { visibility: hidden; }
+  #kasa-ekstre, #kasa-ekstre * { visibility: visible; }
+  #kasa-ekstre { position: absolute; left: 0; top: 0; width: 100%; }
+  .noprint { display: none !important; }
+  #kasa-ekstre button { display: none !important; }
+}

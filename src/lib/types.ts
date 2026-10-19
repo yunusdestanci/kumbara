@@ -53,4 +53,5 @@ export interface Handover {
   status: 'bekliyor' | 'onaylandi';
   note: string | null;
   confirmed_at: string | null;
+  receipt_no: string | null;
 }

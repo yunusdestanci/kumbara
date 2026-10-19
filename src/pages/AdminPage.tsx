@@ -11,10 +11,11 @@ import { ExpenseManager } from '../components/ExpenseManager';
 import { Reports } from '../components/Reports';
 import { AuditLog } from '../components/AuditLog';
 import { CentralCash } from '../components/CentralCash';
+import { DataBackup } from '../components/DataBackup';
 import { printReceipt } from '../lib/receipt';
 import './admin.css';
 
-type Section = 'ana' | 'subeler' | 'kumbara' | 'toplama' | 'teslim' | 'harcama' | 'kasa' | 'rapor' | 'gecmis';
+type Section = 'ana' | 'subeler' | 'kumbara' | 'toplama' | 'teslim' | 'harcama' | 'kasa' | 'rapor' | 'gecmis' | 'yedek';
 
 const MENU: { key: Section; label: string }[] = [
   { key: 'ana', label: 'Ana sayfa' },
@@ -26,6 +27,7 @@ const MENU: { key: Section; label: string }[] = [
   { key: 'kasa', label: 'Merkez kasa' },
   { key: 'rapor', label: 'Raporlar' },
   { key: 'gecmis', label: 'İşlem geçmişi' },
+  { key: 'yedek', label: 'Yedek al' },
 ];
 
 interface CollRow {
@@ -143,6 +145,13 @@ export function AdminPage({ userId }: Props) {
       .from('periods')
       .update({ status: 'kapali', closed_at: new Date().toISOString() })
       .eq('id', id);
+    if (error) setError(error.message);
+    else refresh();
+  }
+
+  async function reopenPeriod(id: string) {
+    if (!confirm('Bu dönem yeniden açılsın mı? Açılınca toplama kayıtları tekrar değiştirilebilir.')) return;
+    const { error } = await supabase.from('periods').update({ status: 'acik', closed_at: null }).eq('id', id);
     if (error) setError(error.message);
     else refresh();
   }
@@ -299,6 +308,7 @@ export function AdminPage({ userId }: Props) {
               <strong>{branchName(h.branch_id)}</strong> · {money(h.amount)}
               <div className="muted small">
                 {dateTr(h.handed_over_at)}
+                {h.receipt_no ? ` · ${h.receipt_no}` : ''}
                 {h.note ? ` · ${h.note}` : ''}
               </div>
             </div>
@@ -312,7 +322,7 @@ export function AdminPage({ userId }: Props) {
                 className="ghost"
                 onClick={() =>
                   printReceipt({
-                    receiptNo: `MK-${new Date(h.handed_over_at).getFullYear()}-${h.id.slice(0, 6).toUpperCase()}`,
+                    receiptNo: h.receipt_no ?? '-',
                     handedAt: h.handed_over_at,
                     branchName: branchName(h.branch_id),
                     amount: h.amount,
@@ -331,6 +341,8 @@ export function AdminPage({ userId }: Props) {
         {handovers.length === 0 && <p className="muted">Henüz teslim kaydı yok.</p>}
       </ul>
     );
+  } else if (section === 'yedek') {
+    content = <DataBackup />;
   } else if (section === 'harcama') {
     content = <ExpenseManager branches={branches} userId={userId} />;
   } else if (section === 'kasa') {
@@ -394,6 +406,9 @@ export function AdminPage({ userId }: Props) {
             </select>
             {selected?.status === 'acik' && (
               <button className="ghost" onClick={() => closePeriod(selected.id)}>Dönemi kapat</button>
+            )}
+            {selected?.status === 'kapali' && (
+              <button className="ghost" onClick={() => reopenPeriod(selected.id)}>Dönemi aç</button>
             )}
             {selected && (
               <button className="ghost" onClick={exportSummaryCsv}>CSV indir</button>

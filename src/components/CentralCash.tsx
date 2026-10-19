@@ -213,13 +213,13 @@ export function CentralCash() {
   }
 
   return (
-    <section>
+    <section id="kasa-ekstre">
       <h3>Merkez kasa ekstresi</h3>
       <p className="muted small">
         Giriş: onaylanan şube teslimleri ve dış girişler. Çıkış: genel merkez harcamaları.
       </p>
 
-      <form className="card" onSubmit={addIncome}>
+      <form className="card noprint" onSubmit={addIncome}>
         <strong>Kasaya dış giriş ekle</strong>
         <div className="form-row">
           <input
@@ -245,7 +245,7 @@ export function CentralCash() {
         {formErr && <p className="error">{formErr}</p>}
       </form>
 
-      <div className="form-row">
+      <div className="form-row noprint">
         <label>
           Başlangıç
           <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
@@ -256,6 +256,9 @@ export function CentralCash() {
         </label>
         <button className="ghost" onClick={exportCsv} disabled={loading || !!err}>
           CSV indir
+        </button>
+        <button className="ghost" onClick={() => window.print()} disabled={loading || !!err}>
+          Yazdır / PDF
         </button>
       </div>
 

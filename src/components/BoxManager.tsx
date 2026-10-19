@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Branch } from '../lib/types';
+import { mapsUrl } from '../lib/format';
 
 interface BoxRow {
   id: string;
@@ -221,7 +222,11 @@ export function BoxManager({ branches, onChanged }: Props) {
               <div>
                 <strong>{b.place_name || typeLabel(b.place_type)}</strong>
                 <span className="muted small"> · {typeLabel(b.place_type)} · {branchName(b.branch_id)}</span>
-                {b.address && <div className="muted small">{b.address}</div>}
+                {b.address && (
+                  <div className="muted small">
+                    {b.address} · <a href={mapsUrl(b.address)} target="_blank" rel="noreferrer">Haritada aç</a>
+                  </div>
+                )}
               </div>
               {b.status === 'aktif' ? (
                 <div className="form-row">
