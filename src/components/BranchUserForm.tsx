@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Branch } from '../lib/types';
+import { validatePassword } from '../lib/password';
 
 interface Props {
   branches: Branch[];
@@ -42,6 +43,13 @@ export function BranchUserForm({ branches }: Props) {
     if (!branchId) {
       setMsg({ type: 'err', text: 'Önce bir şube seçin.' });
       return;
+    }
+    if (password) {
+      const pwErr = validatePassword(password);
+      if (pwErr) {
+        setMsg({ type: 'err', text: pwErr });
+        return;
+      }
     }
     setBusy(true);
     const branch = branches.find((b) => b.id === branchId);
@@ -109,7 +117,7 @@ export function BranchUserForm({ branches }: Props) {
         />
         <input
           type="text"
-          placeholder={isCreate ? 'Geçici şifre (en az 8 karakter)' : 'Yeni şifre (değişmeyecekse boş bırakın)'}
+          placeholder={isCreate ? 'Geçici şifre (8+ karakter, büyük/küçük harf, rakam, simge)' : 'Yeni şifre (değişmeyecekse boş bırakın)'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required={isCreate}

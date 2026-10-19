@@ -1,13 +1,14 @@
 import { useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
+import { PASSWORD_RULE_TEXT, validatePassword } from '../lib/password';
 
 interface Props {
-  // true: şube ilk girişte şifre değiştirmek zorunda (ekranın geri kalanı kilitli)
+  // true: kullanıcı devam etmeden önce şifresini değiştirmek zorunda (ekranın geri kalanı kilitli)
   required: boolean;
   onDone: () => void;
 }
 
-// Şube kullanıcısının kendi şifresini değiştirmesi.
+// Kullanıcının kendi şifresini değiştirmesi. Her değişimde şifre süresi yeniden başlar.
 export function PasswordChange({ required, onDone }: Props) {
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
@@ -19,8 +20,9 @@ export function PasswordChange({ required, onDone }: Props) {
     e.preventDefault();
     setErr(null);
     setOk(false);
-    if (pw.length < 8) {
-      setErr('Şifre en az 8 karakter olmalı.');
+    const pwErr = validatePassword(pw);
+    if (pwErr) {
+      setErr(pwErr);
       return;
     }
     if (pw !== pw2) {
@@ -34,13 +36,11 @@ export function PasswordChange({ required, onDone }: Props) {
       setErr(error.message);
       return;
     }
-    if (required) {
-      const { error: rpcErr } = await supabase.rpc('finish_password_change');
-      if (rpcErr) {
-        setBusy(false);
-        setErr(rpcErr.message);
-        return;
-      }
+    const { error: rpcErr } = await supabase.rpc('finish_password_change');
+    if (rpcErr) {
+      setBusy(false);
+      setErr(rpcErr.message);
+      return;
     }
     setBusy(false);
     setPw('');
@@ -55,10 +55,11 @@ export function PasswordChange({ required, onDone }: Props) {
       {required && (
         <p className="muted small">Hesabınız için yeni bir şifre belirlemeniz gerekiyor. Devam etmek için şifrenizi değiştirin.</p>
       )}
+      <p className="muted small">{PASSWORD_RULE_TEXT}</p>
       <div className="form-row">
         <input
           type="password"
-          placeholder="Yeni şifre (en az 8 karakter)"
+          placeholder="Yeni şifre"
           value={pw}
           onChange={(e) => setPw(e.target.value)}
           autoComplete="new-password"
