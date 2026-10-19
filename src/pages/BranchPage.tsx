@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import type { Box, Collection, Handover, Period } from '../lib/types';
 import { dateTr, mapsUrl, money, monthName, parseAmount } from '../lib/format';
 import { AddBoxForm } from '../components/AddBoxForm';
+import { CollectionEntries } from '../components/CollectionEntries';
 import { PasswordChange } from '../components/PasswordChange';
 import './branch.css';
 
@@ -309,6 +310,9 @@ function BoxRow({ box, collection, periodId, userId, onSaved }: BoxRowProps) {
         </div>
         <span className={`badge ${status}`}>{statusText}</span>
       </div>
+      {collection?.status === 'toplandi' && (
+        <CollectionEntries collectionId={collection.id} version={String(collection.amount)} />
+      )}
 
       {periodId && mode === null && (
         <div className="actions">

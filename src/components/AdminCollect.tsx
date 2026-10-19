@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Box, Branch, Collection, Period } from '../lib/types';
 import { mapsUrl, money, parseAmount } from '../lib/format';
+import { CollectionEntries } from './CollectionEntries';
 
 interface Props {
   branches: Branch[];
@@ -176,6 +177,9 @@ function AdminCollectRow({ box, collection, periodId, userId, onSaved }: RowProp
         </div>
         <span className={`badge ${status}`}>{statusText}</span>
       </div>
+      {collection?.status === 'toplandi' && (
+        <CollectionEntries collectionId={collection.id} version={String(collection.amount)} />
+      )}
 
       {periodId && mode === null && (
         <div className="actions">
