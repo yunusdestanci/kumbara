@@ -45,6 +45,8 @@ export function AdminPage({ userId }: Props) {
   const month = now.getMonth() + 1;
 
   const [section, setSection] = useState<Section>('ana');
+  // Telefonda yan menünün açık/kapalı durumu
+  const [menuOpen, setMenuOpen] = useState(false);
   const [periods, setPeriods] = useState<Period[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [boxes, setBoxes] = useState<Pick<Box, 'id' | 'branch_id' | 'status'>[]>([]);
@@ -341,7 +343,17 @@ export function AdminPage({ userId }: Props) {
 
   return (
     <div className="admin-shell">
-      <nav className="admin-nav">
+      <header className="admin-topbar">
+        <div className="brand-mini">
+          <img src="/logo.png" alt="" />
+          <span>Serhendi Halkalı</span>
+        </div>
+        <button className="admin-menu-btn" aria-label="Menüyü aç" onClick={() => setMenuOpen(true)}>
+          ☰
+        </button>
+      </header>
+      {menuOpen && <div className="admin-backdrop" onClick={() => setMenuOpen(false)} />}
+      <nav className={`admin-nav ${menuOpen ? 'open' : ''}`}>
         <div className="brand">
           <img src="/logo.png" alt="Serhendi Vakfı" />
           <span>
@@ -353,7 +365,10 @@ export function AdminPage({ userId }: Props) {
           <button
             key={m.key}
             className={`admin-nav-item ${section === m.key ? 'active' : ''}`}
-            onClick={() => setSection(m.key)}
+            onClick={() => {
+              setSection(m.key);
+              setMenuOpen(false);
+            }}
           >
             {m.label}
             {m.key === 'teslim' && pendingHandovers.length > 0 && (

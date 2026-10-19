@@ -1,4 +1,4 @@
-/* Admin paneli düzeni: sol menü (masaüstü) / üst yatay menü (telefon) */
+/* Admin paneli düzeni: sol menü (masaüstü) / telefonda ☰ ile açılan yan menü */
 .admin-shell {
   display: flex;
   min-height: 100vh;
@@ -129,65 +129,135 @@
   margin-bottom: 4px;
 }
 
+/* Telefon üst çubuğu ve yan menü: masaüstünde gizli */
+.admin-topbar,
+.admin-backdrop {
+  display: none;
+}
+
 @media (max-width: 760px) {
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #1f6f4a;
+    color: #fff;
+    padding: 10px 14px;
+  }
+
+  .brand-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .brand-mini img {
+    width: 36px;
+    height: 36px;
+    background: #fff;
+    border-radius: 6px;
+    padding: 2px;
+    box-sizing: border-box;
+  }
+
+  .admin-menu-btn {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 20px;
+    min-width: 48px;
+    min-height: 44px;
+    cursor: pointer;
+  }
+
   .admin-shell {
     flex-direction: column;
   }
+
   .admin-nav {
-    width: auto;
-    height: auto;
-    position: static;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 10px;
-    gap: 6px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    width: min(290px, 84vw);
+    z-index: 40;
+    overflow-y: auto;
+    padding: 16px 12px;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
   }
+
+  .admin-nav.open {
+    transform: translateX(0);
+  }
+
   .admin-nav .brand {
-    padding: 0 6px 0 0;
+    padding: 4px 10px 16px;
   }
-  .admin-nav .brand img {
-    width: 44px;
-    height: 44px;
-  }
-  .admin-nav .brand span {
-    display: none;
-  }
+
   .admin-nav-item {
-    width: auto;
-    white-space: nowrap;
+    white-space: normal;
+    min-height: 44px;
   }
+
   .admin-nav .logout {
-    margin-top: 0;
+    margin-top: auto;
   }
+
+  .admin-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 35;
+  }
+
   .admin-main {
     padding: 14px 16px;
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
   }
+
   .admin-main .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
+
   .admin-main .stat {
     min-width: 0;
     padding: 10px;
   }
+
   .admin-main .stat-value {
     font-size: 1rem;
     overflow-wrap: anywhere;
   }
+
   .admin-main .alert-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+
   .admin-main .table-wrap {
     max-width: 100%;
     -webkit-overflow-scrolling: touch;
   }
+
   .admin-main .table-wrap th,
   .admin-main .table-wrap td {
     padding: 8px 10px;
   }
+
   .admin-main .admin-top h2 {
     font-size: 1.25rem;
   }
