@@ -15,11 +15,11 @@ interface Props {
 type Tab = 'ozet' | 'kumbara' | 'teslim' | 'harcama' | 'hesap';
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'ozet', label: 'Özet' },
-  { id: 'kumbara', label: 'Kumbaralar' },
-  { id: 'teslim', label: 'Teslim' },
-  { id: 'harcama', label: 'Harcama' },
-  { id: 'hesap', label: 'Hesabım' },
+  { id: 'ozet', label: 'Ana sayfa' },
+  { id: 'kumbara', label: 'Kumbaralarım' },
+  { id: 'teslim', label: 'Para teslimi' },
+  { id: 'harcama', label: 'Şube harcamaları' },
+  { id: 'hesap', label: 'Şifre ve hesap' },
 ];
 
 // Şube ekranı: RLS sayesinde sadece kendi şubesinin kumbara ve kayıtları gelir.

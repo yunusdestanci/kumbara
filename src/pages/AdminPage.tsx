@@ -21,13 +21,13 @@ const MENU: { key: Section; label: string }[] = [
   { key: 'ana', label: 'Ana sayfa' },
   { key: 'subeler', label: 'Şubeler' },
   { key: 'kumbara', label: 'Kumbaralar' },
-  { key: 'toplama', label: 'Toplama durumu' },
-  { key: 'teslim', label: 'Teslimler' },
-  { key: 'harcama', label: 'Harcamalar' },
-  { key: 'kasa', label: 'Merkez kasa' },
+  { key: 'toplama', label: 'Aylık toplamalar' },
+  { key: 'teslim', label: 'Teslim onayları' },
+  { key: 'harcama', label: 'Merkez harcamaları' },
+  { key: 'kasa', label: 'Kasa hesabı' },
   { key: 'rapor', label: 'Raporlar' },
-  { key: 'gecmis', label: 'İşlem geçmişi' },
-  { key: 'yedek', label: 'Yedek al' },
+  { key: 'gecmis', label: 'Değişiklik kayıtları' },
+  { key: 'yedek', label: 'Yedekleme' },
 ];
 
 interface CollRow {
