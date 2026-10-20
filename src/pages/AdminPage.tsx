@@ -12,6 +12,7 @@ import { Reports } from '../components/Reports';
 import { AuditLog } from '../components/AuditLog';
 import { CentralCash } from '../components/CentralCash';
 import { DataBackup } from '../components/DataBackup';
+import { RestoreBackup } from '../components/RestoreBackup';
 import { printReceipt } from '../lib/receipt';
 import './admin.css';
 
@@ -342,7 +343,12 @@ export function AdminPage({ userId }: Props) {
       </ul>
     );
   } else if (section === 'yedek') {
-    content = <DataBackup />;
+    content = (
+      <>
+        <DataBackup />
+        <RestoreBackup />
+      </>
+    );
   } else if (section === 'harcama') {
     content = <ExpenseManager branches={branches} userId={userId} />;
   } else if (section === 'kasa') {
